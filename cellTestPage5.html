@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html style="overflow:hidden">
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1">
+  <title>Markers in AR.js test</title>
+  <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
+  <script src="https://rawgit.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.min.js"></script>
+  <script src="https://unpkg.com/aframe-look-at-component@0.8.x/dist/aframe-look-at-component.min.js"></script>
+</head>
+
+<body style='margin : 0px; overflow: hidden;'>
+
+  <a-scene embedded arjs='trackingMethod: best; debugUIEnabled: false;' vr-mode-ui="enabled: false">
+
+    <a-marker type="pattern" preset="custom" url="resources/markers/cell-test-marker.patt">
+
+      <a-entity position="-1.9 0 -1.02">
+          <a-circle rotation="-90 0 0" color="red" radius="0.04" opacity="0.6"></a-circle>
+          <a-entity line="start: 0 0 0; end: 0 0.5 -0.33; color: red"></a-entity>
+          <a-plane color="#f9ed69" height="0.4" width="1.2" rotation="-70 0 0" position="0 0.5 -0.5" opacity="0.8">      
+              <a-text value="Retículo\nendoplasmático rugoso" color="#b83b5e" position="0 0 0.04" align="center" font="OpenSans-Regular-msdf.json" negate="false" width="5" wrap-count="100"></a-text>
+          </a-plane>
+      </a-entity>
+
+      <a-entity position="-1.9 0 -2.28">
+          <a-circle rotation="-90 0 0" color="red" radius="0.04" opacity="0.6"></a-circle>
+          <a-entity line="start: 0 0 0; end: 0 0.5 -0.33; color: red"></a-entity>
+          <a-plane color="#f9ed69" height="0.4" width="1.2" rotation="-70 0 0" position="0 0.5 -0.5" opacity="0.8">      
+              <a-text value="Lisosoma" color="#b83b5e" position="0 0 0.04" align="center" font="OpenSans-Regular-msdf.json" negate="false" width="5" wrap-count="100"></a-text>
+          </a-plane>
+      </a-entity>
+
+      <a-entity position="0 0 -1.02">
+          <a-circle rotation="-90 0 0" color="red" radius="0.04" opacity="0.6"></a-circle>
+          <a-entity line="start: 0 0 0; end: 0 0.5 -0.33; color: red"></a-entity>
+          <a-plane color="#f9ed69" height="0.4" width="1.2" rotation="-70 0 0" position="0 0.5 -0.5" opacity="0.8">      
+              <a-text value="Aparato de Golgi" color="#b83b5e" position="0 0 0.04" align="center" font="OpenSans-Regular-msdf.json" negate="false" width="5" wrap-count="100"></a-text>
+          </a-plane>
+      </a-entity>
+
+      <a-entity position="-0.25 0 -2.28">
+          <a-circle rotation="-90 0 0" color="red" radius="0.04" opacity="0.6"></a-circle>
+          <a-entity line="start: 0 0 0; end: 0 0.5 -0.33; color: red"></a-entity>
+          <a-plane color="#f9ed69" height="0.4" width="1.2" rotation="-70 0 0" position="0 0.5 -0.5" opacity="0.8">      
+              <a-text value="Mitocondria" color="#b83b5e" position="0 0 0.04" align="center" font="OpenSans-Regular-msdf.json" negate="false" width="5" wrap-count="100"></a-text>
+          </a-plane>
+      </a-entity>
+
+      <!-- <a-plane look-at="[camera]" color="#CCC" height="1" width="2" rotation="-90 0 0" position="1.1 0 -1-8" opacity="0.8">      
+        <a-text value="Welcome!" color="#ff0000" position="0 0 0.1" scale="1.5 1.5 1.5" align: center;></a-text>
+      </a-plane> -->
+
+    </a-marker>
+    <a-entity camera></a-entity>
+
+  </a-scene>
+  
+
+</body>
+</html>
+
