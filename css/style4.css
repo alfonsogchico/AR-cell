@@ -1,0 +1,48 @@
+/**************************\
+  UI Styles
+\**************************/
+body {
+    
+}
+
+.video-controls {
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    bottom: 3%;
+    left: 3%;
+    z-index: 2;
+    width: 252;
+    font-family: 'Open Sans';
+    font-size: 22px;
+}
+
+
+.video-controls {
+    background-color: rgba(204,204,204,0.5);
+    border-radius: 15px;
+}
+
+
+#controls {
+    margin: 0 auto;
+  }
+
+
+#controls button {
+    border: none; 
+    height: 40px;
+    margin: 3px;
+    color: white; 
+    background-color: #535454;
+    box-shadow: 2px 2px #4444;
+    text-align: center; 
+    width: 44px;
+    font-size: 15px;
+    border-radius: 50%; 
+}
+
+#controls button:hover{
+    background-color: #7E7F7F;
+}
+ 
