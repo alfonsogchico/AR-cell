@@ -162,8 +162,8 @@
             const curr = model.getAttribute('rotation');
             model.setAttribute('rotation', {
               'x': curr.x + ev.deltaY*0.02,
-              'y': curr.y + ev.deltaX*0.02,
-              'z': curr.z
+              'y': curr.y,
+              'z': curr.z + ev.deltaX*0.02
               });
 
              
