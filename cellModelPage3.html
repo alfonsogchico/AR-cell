@@ -5,13 +5,14 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1">
-  <title>Animation in AR.js test</title>
+  <title>3D view in AR.js example</title>
+  <link rel="stylesheet" href="css/style3.css">
   <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
   <script src="https://rawgit.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.min.js"></script>
   <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
   <script src="https://hammerjs.github.io/dist/hammer.js"></script>
-
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css"> -->
+  <!-- requestAnimationFrame polyfill -->
+  <script src="js/rAF.js"></script>
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
 
@@ -21,42 +22,275 @@
       init: function () {
         var sceneEl = this.el;
         const scene = document.getElementById('scene')
-        //scene.addEventListener('touchmove', event => {movingTouch(event)})
-        
+       
         const model = document.getElementById('model')
 
-        const rotBut = document.getElementById('rotation-btn')
-        var rotation = new Hammer(rotBut);
-        rotation.on('panmove', function(ev) {
-          const curr = model.getAttribute('rotation');
-          model.setAttribute('rotation', {
-            'x': curr.x,
-            'y': curr.y + ev.deltaX*0.02,
-            'z': curr.z
-            });
-        });
         
-        const zoomBut = document.getElementById('zoom-btn')
-        var zoom = new Hammer(zoomBut);
-        zoom.on('panmove', function(ev) {
-          const curr = model.getAttribute('scale');
-          var newscale = curr.x + ev.deltaX*0.00001;
+
+        /*
+        *
+        *   pads implementation
+        * 
+        * 
+        * 
+        */ 
+
+        var screen = document.querySelector(".rot-controls");
+        var el = document.querySelector("#rot-slider");
+
+        var zscreen = document.querySelector(".zoom-controls");
+        var zel = document.querySelector("#zoom-slider");
+        
+        var START_X = Math.round((screen.offsetWidth - el.offsetWidth) / 2);
+        var START_Y = Math.round((screen.offsetHeight - el.offsetHeight) / 2);
+        
+        var ZSTART_X = Math.round((zscreen.offsetWidth - zel.offsetWidth) / 2);
+	      var ZSTART_Y = Math.round((zscreen.offsetHeight - zel.offsetHeight) / 2);
+
+        var ticking = false;
+        var transform;
+        var ztransform;
+        var timer;
+        const initialRotation = "140 0 180";
+        const initialScale = "0.08 0.08 0.08";
+        var mc = new Hammer.Manager(el);
+        var zmc = new Hammer.Manager(zel);
+
+        mc.add(new Hammer.Pan({ threshold: 0, pointers: 0 }));
+        zmc.add(new Hammer.Pan({ threshold: 0, pointers: 0 }));
+        
+        mc.add(new Hammer.Swipe()).recognizeWith(mc.get('pan'));
+	      mc.add(new Hammer.Rotate({ threshold: 0 })).recognizeWith(mc.get('pan'));
+        mc.add(new Hammer.Pinch({ threshold: 0 })).recognizeWith([mc.get('pan'), mc.get('rotate')]);
+        
+        zmc.add(new Hammer.Swipe()).recognizeWith(zmc.get('pan'));
+	      zmc.add(new Hammer.Rotate({ threshold: 0 })).recognizeWith(zmc.get('pan'));
+        zmc.add(new Hammer.Pinch({ threshold: 0 })).recognizeWith([zmc.get('pan'), zmc.get('rotate')]);
+        
+        mc.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
+        mc.add(new Hammer.Tap());
+
+        zmc.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
+        zmc.add(new Hammer.Tap());
+
+        mc.on("panstart panmove", onPan);
+        mc.on("swipe", onSwipe);
+        mc.on("tap", onTap);
+        mc.on("doubletap", onDoubleTap);
+
+        zmc.on("panstart panmove", zonPan);
+        zmc.on("swipe", zonSwipe);
+        zmc.on("tap", zonTap);
+        zmc.on("doubletap", zonDoubleTap);
+
+        mc.on("hammer.input", function(ev) {
+            if(ev.isFinal) {
+                resetElement();
+            }
+        });
+
+        zmc.on("hammer.input", function(ev) {
+            if(ev.isFinal) {
+                zresetElement();
+            }
+        });
+
+        function resetElement() {
+            el.className = 'animate';
+            transform = {
+                translate: { x: START_X, y: START_Y },
+                scale: 1,
+                angle: 0,
+                rx: 0,
+                ry: 0,
+                rz: 0
+            };
+            requestElementUpdate();
+        }
+
+        function zresetElement() {
+            zel.className = 'animate';
+            ztransform = {
+                translate: { x: ZSTART_X, y: ZSTART_Y },
+                scale: 1,
+                angle: 0,
+                rx: 0,
+                ry: 0,
+                rz: 0
+            };
+            requestElementUpdate();
+        }
+
+        function updateElementTransform() {
+            var value = [
+                'translate3d(' + transform.translate.x + 'px, ' + transform.translate.y + 'px, 0)',
+                'scale(' + transform.scale + ', ' + transform.scale + ')',
+                'rotate3d('+ transform.rx +','+ transform.ry +','+ transform.rz +','+  transform.angle + 'deg)'
+            ];
+
+            var zvalue = [
+                'translate3d(' + ztransform.translate.x + 'px, ' + ztransform.translate.y + 'px, 0)',
+                'scale(' + ztransform.scale + ', ' + ztransform.scale + ')',
+                'rotate3d('+ ztransform.rx +','+ ztransform.ry +','+ ztransform.rz +','+  ztransform.angle + 'deg)'
+            ];
+
+            value = value.join(" ");
+            zvalue = zvalue.join(" ");
+            el.style.webkitTransform = value;
+            el.style.mozTransform = value;
+            el.style.transform = value;
+            zel.style.webkitTransform = zvalue;
+            zel.style.mozTransform = zvalue;
+            zel.style.transform = zvalue;
+            ticking = false;
+        }
+
+        function requestElementUpdate() {
+            if(!ticking) {
+                requestAnimationFrame(updateElementTransform);
+                ticking = true;
+            }
+        }
+
+        function onPan(ev) {
+            el.className = '';
+            transform.translate = {
+                x: START_X + ev.deltaX,
+                y: START_Y + ev.deltaY
+            };
+
+            const curr = model.getAttribute('rotation');
+            model.setAttribute('rotation', {
+              'x': curr.x + ev.deltaY*0.02,
+              'y': curr.y + ev.deltaX*0.02,
+              'z': curr.z
+              });
+
+             
+            requestElementUpdate();
+        }
+
+        function zonPan(ev) {
+            zel.className = '';
+            ztransform.translate = {
+                x: ZSTART_X,
+                y: ZSTART_Y + ev.deltaY
+            };
+
+            const curr = model.getAttribute('scale');
+          var newscale = curr.x - ev.deltaY*0.00002;
           if (newscale<0) { newscale = 0};
             model.setAttribute('scale', {
               'x': newscale,
               'y': newscale,
               'z': newscale
               });
-          
-        });
 
-        // const plaBut = document.getElementById('play-btn')
-        // var animate = new Hammer(plaBut);
-        // animate.on('tap', function(ev) {
-        //   model.setAttribute("animation-mixer","clip: poser;"); 
-        //   var endAnimation = function () {sceneEl.removeEventListener('animation-loop',endAnimation); model.setAttribute("animation-mixer","clip: idle;");};
-        //   setTimeout (function(){sceneEl.addEventListener('animation-loop',endAnimation);},500);
-        // });
+             
+            requestElementUpdate();
+        }
+
+        
+
+
+
+        function onSwipe(ev) {
+            var angle = 50;
+            transform.ry = (ev.direction & Hammer.DIRECTION_HORIZONTAL) ? 1 : 0;
+            transform.rx = (ev.direction & Hammer.DIRECTION_VERTICAL) ? 1 : 0;
+            transform.angle = (ev.direction & (Hammer.DIRECTION_RIGHT | Hammer.DIRECTION_UP)) ? angle : -angle;
+
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                resetElement();
+            }, 300);
+
+             
+            requestElementUpdate();
+        }
+
+        function zonSwipe(ev) {
+            var angle = 50;
+            ztransform.ry = (ev.direction & Hammer.DIRECTION_HORIZONTAL) ? 1 : 0;
+            ztransform.rx = (ev.direction & Hammer.DIRECTION_VERTICAL) ? 1 : 0;
+            ztransform.angle = (ev.direction & (Hammer.DIRECTION_RIGHT | Hammer.DIRECTION_UP)) ? angle : -angle;
+
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                resetElement();
+            }, 300);
+
+             
+            requestElementUpdate();
+        }
+
+        function onTap(ev) {
+            transform.rx = 1;
+            transform.angle = 25;
+
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                resetElement();
+            }, 200);
+
+             
+            requestElementUpdate();
+        }
+
+        function zonTap(ev) {
+            ztransform.rx = 1;
+            ztransform.angle = 25;
+
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                resetElement();
+            }, 200);
+
+             
+            requestElementUpdate();
+        }
+
+        function onDoubleTap(ev) {
+            transform.rx = 1;
+            transform.angle = 80;
+
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                resetElement();
+            }, 500);
+
+            model.setAttribute('rotation', {
+              'x': 140,
+              'y': 0,
+              'z': 180
+              });
+            
+            requestElementUpdate();
+        }
+        
+        function zonDoubleTap(ev) {
+            // ztransform.rx = 1;
+            // ztransform.angle = 80;
+
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                resetElement();
+            }, 500);
+
+            model.setAttribute('scale', {
+              'x': 0.08,
+              'y': 0.08,
+              'z': 0.08
+              });
+            
+            requestElementUpdate();
+        }
+
+        resetElement();
+        zresetElement();
+
+
+
       }
     });
   </script>
@@ -78,36 +312,20 @@
 
   </a-scene>
   
+  
+  <div class="rot-controls" >
 
-  <div class="columns" style='position: fixed; bottom: 10%; left: 0%; text-align: center; width: 100%; z-index: 1;'>
-    
-    <div class="column"></div>
-    
-    <div class="column">
-      
-      <div class="buttons">
-        <button class="button" id="rotation-btn"  style='width: 35%; height: 20%;'>
-              <span class="icon">
-                  <i class="fas fa-sync-alt"></i>
-                </span>
-                <span>arrastrar para rotar</span>
-        </button>
-        <button class="button" id="zoom-btn" style='width: 35%;'>
-          <span class="icon">
-            <i class="fas fa-search-plus"></i>
-          </span>
-          <span>arrastrar para zoom</span></button>
-        <!-- <button class="button" id="play-btn" style='width: 20%;'>
-            <span class="icon">
-                <i class="fas fa-play"></i>
-              </span>
-              <span>saludar</span>
-        </button> -->
+      <div class="pad"> 
+        <div id="rot-slider"><i class="fas fa-sync-alt"></i></div> 
       </div>
-    </div>
-  
   </div>
-  
+
+  <div class="zoom-controls" >
+
+      <div class="pad"> 
+        <div id="zoom-slider"><i class="fas fa-search-plus"></i></div> 
+      </div>
+  </div>
 
 </body>
 </html>
