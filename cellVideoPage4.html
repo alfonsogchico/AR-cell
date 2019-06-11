@@ -86,20 +86,24 @@
     });
   </script>
   
+  <!-- A-frame scene definition, using AR.js and including the custom code throught the registered component video-controls -->
   <a-scene embedded arjs='trackingMethod: best; debugUIEnabled: false;' vr-mode-ui="enabled: false" video-controls>
 
+      <!-- video pre-loading -->
     <a-assets>
       <video id="myVideo" src="resources/Mitosis-SD-480p.mov"></video>
     </a-assets>
 
+    <!-- custom marker -->
     <a-marker type="pattern" preset="custom" url="resources/markers/cell-video-marker.patt">
+      <!-- marker-video association and position. Using a cube primitive with the video as a texture for the top face only, using A-frame multisrc component -->
       <a-entity geometry="primitive: box; width: 2.254; height: 0.01; depth: 1.268;" multisrc="src2:#myVideo" position="-0.68 0 -1.28"></a-entity>
     </a-marker>
     <a-entity camera></a-entity>
 
   </a-scene>
 
-
+  <!-- UI controls -->
   <div class="video-controls" >
 
     <div id="controls"> 
