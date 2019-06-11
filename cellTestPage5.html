@@ -13,18 +13,26 @@
 
 <body style='margin : 0px; overflow: hidden;'>
 
+  <!-- A-frame scene definition with AR.js -->
   <a-scene embedded arjs='trackingMethod: best; debugUIEnabled: false;' vr-mode-ui="enabled: false">
 
+    <!-- using custom marker -->
     <a-marker type="pattern" preset="custom" url="resources/markers/cell-test-marker.patt">
 
+      <!-- the label is an entity with the circle, the line and the rectangle with the text. The entity position is related to the marker -->
       <a-entity position="-1.6 0 -0.9">
-          <a-circle rotation="-90 0 0" color="red" radius="0.04" opacity="0.6"></a-circle>
-          <a-entity line="start: 0 0 0; end: 0 0.5 -0.33; color: red"></a-entity>
-          <a-plane color="#f9ed69" height="0.4" width="1.2" rotation="-70 0 0" position="0 0.5 -0.5" opacity="0.8">      
-              <a-text value="Retículo\nendoplasmático rugoso" color="#b83b5e" position="0 0 0.04" align="center" font="OpenSans-Regular-msdf.json" negate="false" width="5" wrap-count="100"></a-text>
-          </a-plane>
+        <!--The elements are included inside the entity  -->
+        <a-circle rotation="-90 0 0" color="red" radius="0.04" opacity="0.6"></a-circle>
+        <!-- the elements positions are relative to the entity position -->
+        <a-entity line="start: 0 0 0; end: 0 0.5 -0.33; color: red"></a-entity>
+        <a-plane color="#f9ed69" height="0.4" width="1.2" rotation="-70 0 0" position="0 0.5 -0.5" opacity="0.8">
+          <!-- using a custom bmfont generated from Open sans -->
+          <a-text value="Retículo\nendoplasmático rugoso" color="#b83b5e" position="0 0 0.04" align="center"
+            font="OpenSans-Regular-msdf.json" negate="false" width="5" wrap-count="100"></a-text>
+        </a-plane>
       </a-entity>
 
+      <!-- the other labels -->
       <a-entity position="-1.55 0 -2.1">
           <a-circle rotation="-90 0 0" color="red" radius="0.04" opacity="0.6"></a-circle>
           <a-entity line="start: 0 0 0; end: 0 0.5 -0.33; color: red"></a-entity>
@@ -48,6 +56,8 @@
               <a-text value="Mitocondria" color="#b83b5e" position="0 0 0.04" align="center" font="OpenSans-Regular-msdf.json" negate="false" width="5" wrap-count="100"></a-text>
           </a-plane>
       </a-entity>
+
+      <!-- look at camera module could be used to make easer to read the labels, but we lose the 'contextual feeling' -->
 
       <!-- <a-plane look-at="[camera]" color="#CCC" height="1" width="2" rotation="-90 0 0" position="1.1 0 -1-8" opacity="0.8">      
         <a-text value="Welcome!" color="#ff0000" position="0 0 0.1" scale="1.5 1.5 1.5" align: center;></a-text>
