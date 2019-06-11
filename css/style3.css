@@ -15,7 +15,7 @@
 }
 
 .zoom-controls {
-    bottom: 10%;
+    bottom: 6%;
     right: 3%;
     height: 176px;
     width: 60px;
@@ -23,7 +23,7 @@
 
 
 .rot-controls {
-    bottom: 10%;
+    bottom: 6%;
     left: 3%;
     height: 176px;
     width: 176px;
