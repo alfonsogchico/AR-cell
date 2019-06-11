@@ -35,18 +35,21 @@
         * 
         */ 
 
+        //first we get the controls
         var screen = document.querySelector(".rot-controls");
         var el = document.querySelector("#rot-slider");
 
         var zscreen = document.querySelector(".zoom-controls");
         var zel = document.querySelector("#zoom-slider");
         
+        // and we calculate the center of each pad
         var START_X = Math.round((screen.offsetWidth - el.offsetWidth) / 2);
         var START_Y = Math.round((screen.offsetHeight - el.offsetHeight) / 2);
         
         var ZSTART_X = Math.round((zscreen.offsetWidth - zel.offsetWidth) / 2);
 	      var ZSTART_Y = Math.round((zscreen.offsetHeight - zel.offsetHeight) / 2);
 
+        // var initialization
         var ticking = false;
         var transform;
         var ztransform;
@@ -56,6 +59,7 @@
         var mc = new Hammer.Manager(el);
         var zmc = new Hammer.Manager(zel);
 
+        // gestures to detect initialization
         mc.add(new Hammer.Pan({ threshold: 0, pointers: 0 }));
         zmc.add(new Hammer.Pan({ threshold: 0, pointers: 0 }));
         
@@ -73,6 +77,7 @@
         zmc.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
         zmc.add(new Hammer.Tap());
 
+        // for each gesture we call the corresponding function
         mc.on("panstart panmove", onPan);
         mc.on("swipe", onSwipe);
         mc.on("tap", onTap);
@@ -83,6 +88,7 @@
         zmc.on("tap", zonTap);
         zmc.on("doubletap", zonDoubleTap);
 
+        // when the gesture ends, the control is reseted to its initial position 
         mc.on("hammer.input", function(ev) {
             if(ev.isFinal) {
                 resetElement();
@@ -121,6 +127,7 @@
             requestElementUpdate();
         }
 
+        // funtion to update the position, scale and rotation throught css
         function updateElementTransform() {
             var value = [
                 'translate3d(' + transform.translate.x + 'px, ' + transform.translate.y + 'px, 0)',
@@ -145,6 +152,7 @@
             ticking = false;
         }
 
+        // the transformation is in sync with the animation frame
         function requestElementUpdate() {
             if(!ticking) {
                 requestAnimationFrame(updateElementTransform);
@@ -152,6 +160,7 @@
             }
         }
 
+        // the left pad rotate the model on pan from the viewer perspective (and move the control)
         function onPan(ev) {
             el.className = '';
             transform.translate = {
@@ -169,6 +178,9 @@
              
             requestElementUpdate();
         }
+        
+        
+        // the right pad zoom the model on pan (and move the other control)
 
         function zonPan(ev) {
             zel.className = '';
@@ -194,6 +206,7 @@
 
 
 
+        // on swipping and single tapping the control is animated
         function onSwipe(ev) {
             var angle = 50;
             transform.ry = (ev.direction & Hammer.DIRECTION_HORIZONTAL) ? 1 : 0;
@@ -250,6 +263,7 @@
             requestElementUpdate();
         }
 
+        // on double tap the model is reseted to its initial values
         function onDoubleTap(ev) {
             transform.rx = 1;
             transform.angle = 80;
@@ -294,14 +308,19 @@
       }
     });
   </script>
+  
+  <!-- scene definition in a-frame using ar.js -->
   <a-scene embedded arjs='trackingMethod: best; debugUIEnabled: false;' vr-mode-ui="enabled: false" 3d-model-control>
     
+    <!-- first we load the 3D model -->
     <a-assets>
       <a-asset-item id="3d-obj" src="resources/models/celula-eucariota-trans-gltf.glb"></a-asset-item>
     </a-assets>
 
+    <!-- custom pattern definition -->
     <a-marker type="pattern" preset="custom" url="resources/markers/3d-cell-marker.patt">
-        <a-entity 
+        <!-- we asociate the pattern with the 3D model, defining its initial scale, rotation and and position  -->
+      <a-entity 
           id="model"
           gltf-model="#3d-obj" 
           scale="0.08 0.08 0.08"
@@ -312,7 +331,7 @@
 
   </a-scene>
   
-  
+  <!-- UI controls -->
   <div class="rot-controls" >
 
       <div class="pad"> 
